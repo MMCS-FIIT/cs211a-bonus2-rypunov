@@ -10,7 +10,7 @@ using Telegram.Bot.Types.Enums;
 public class TelegramBot
 {
     // Токен TG-бота. Можно получить у @BotFather
-    private const string BotToken = "ВАШ_ТОКЕН_ИДЕНТИФИКАЦИИ_БОТА";
+    private const string BotToken = "6422108501:AAH0BRW5sMGoN9CaESOP7cSA1CTile8YDgw";
     
     /// <summary>
     /// Инициализирует и обеспечивает работу бота до нажатия клавиши Esc

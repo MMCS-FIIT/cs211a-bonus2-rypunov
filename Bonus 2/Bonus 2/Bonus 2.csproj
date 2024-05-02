@@ -8,4 +8,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="MyProg.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="telegram.bot" Version="19.0.0" />
+  </ItemGroup>
+
 </Project>
