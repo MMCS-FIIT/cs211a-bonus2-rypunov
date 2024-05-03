@@ -9,12 +9,12 @@ using Telegram.Bot.Types;
 
 namespace Bonus_2
 {
-    internal class Parsing
+    public class Parsing
     {
         /// <summary>
         /// Класс фильма
         /// </summary>
-        class Film
+        public class Film
         {
             public string Name { get; }
             public string Date { get; }
@@ -49,7 +49,7 @@ namespace Bonus_2
         /// <summary>
         /// Обрабатывает файл для хранения информации о фильмах
         /// </summary>
-        public static void Parssing()
+        public static List<Film> ParsFile()
         {
             var lines_arr = System.IO.File.ReadAllLines("input_files/imdb.csv");
             var movie_database = new List<Film>();
@@ -71,6 +71,7 @@ namespace Bonus_2
                         el_film[^9], el_film[^8], el_film[^6]));
                 }
             }
+            return movie_database;
             //for (int i = 0; i < 50; i++)
             //    Console.WriteLine(movie_database[i]);
         }

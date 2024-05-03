@@ -6,6 +6,8 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
+
 
 public class TelegramBot
 {
@@ -84,12 +86,71 @@ public class TelegramBot
         Console.WriteLine($"Получено сообщение в чате {chatId}: '{messageText}'");
 
         // TODO: Обработка пришедших сообщений
-        
-        // Отправляем обратно то же сообщение, что и получили
-        Message sentMessage = await botClient.SendTextMessageAsync(
-            chatId: chatId,
-            text: "Ты написал:\n" + messageText,
-            cancellationToken: cancellationToken);
+        if (message.Text.ToLower().Contains("/start"))
+        {
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Привет, " + message.Chat.FirstName + "!\nЯ помогу подобрать лучший фильм специально для тебя.",
+                cancellationToken: cancellationToken);
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "Фильм 🎥", "Сериал 🎞" },
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            Message sentMessage = await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Что ты хочешь подобрать?",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+
+        if (message.Text.ToLower().Contains("/end"))
+        {
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Заглядывайте еще!",
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        if (message.Text.ToLower().Contains("Фильм ??"))
+        {
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "Год выпуска", "Рейтинг на IMDb" },
+                new KeyboardButton[] { "Жанр", "Кол-во эпизодов" },
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Отлично! Выбери характеристику, которую хочешь настроить.",
+                cancellationToken: cancellationToken);
+        }
+
+        if (message.Text.ToLower().Contains("Сериал ??"))
+        {
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "Год выпуска", "Рейтинг на IMDb" },
+                new KeyboardButton[] { "Жанр", "Продолжительность" },
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Прекрасно! Выбери характеристику, которую хочешь настроить.",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
     }
 
     /// <summary>

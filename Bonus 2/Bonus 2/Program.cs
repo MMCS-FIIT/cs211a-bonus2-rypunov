@@ -7,7 +7,7 @@ public static class Program
     // Метод main немного видоизменился для асинхронной работы
     public static async Task Main(string[] args)
     {
-        //Parsing.Parssing();
+        //var p = Parsing.ParsFile();
         TelegramBot telegramBot = new TelegramBot();
         await telegramBot.Run();
     }
