@@ -17,7 +17,7 @@ namespace Bonus_2
         public class Film
         {
             public string Name { get; }
-            public string Date { get; }
+            public int Date { get; }
             public double Rating { get; }
             public string Genre { get; }
             public string Type { get; }
@@ -25,7 +25,7 @@ namespace Bonus_2
             public Film(string name, string date, double raiting, string genre, string duration, string type, string episodes)
             {
                 Name = name;
-                Date = date;
+                Date = int.Parse(date);
                 Rating = raiting;
                 Genre = genre;
                 Type = type;

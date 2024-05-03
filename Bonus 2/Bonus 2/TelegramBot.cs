@@ -1,6 +1,9 @@
 ﻿using System.Reflection.Metadata.Ecma335;
 
 namespace SimpleTGBot;
+
+using Bonus_2;
+using System;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -85,7 +88,7 @@ public class TelegramBot
         // Печатаем на консоль факт получения сообщения
         Console.WriteLine($"Получено сообщение в чате {chatId}: '{messageText}'");
 
-        // TODO: Обработка пришедших сообщений
+        // Обработка стартового сообщения
         if (message.Text.ToLower().Contains("/start"))
         {
             await botClient.SendTextMessageAsync(
@@ -95,7 +98,7 @@ public class TelegramBot
 
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
             {
-                new KeyboardButton[] { "Фильм 🎥", "Сериал 🎞" },
+                new KeyboardButton[] { "Фильм", "Сериал" },
             })
             {
                 ResizeKeyboard = true
@@ -103,11 +106,12 @@ public class TelegramBot
 
             Message sentMessage = await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: "Что ты хочешь подобрать?",
+                text: "Что ты хочешь посмотреть?",
                 replyMarkup: replyKeyboardMarkup,
                 cancellationToken: cancellationToken);
         }
 
+        // Обработка конечного сообщения
         if (message.Text.ToLower().Contains("/end"))
         {
             await botClient.SendTextMessageAsync(
@@ -117,8 +121,10 @@ public class TelegramBot
             return;
         }
 
-        if (message.Text.ToLower().Contains("Фильм ??"))
+        // Обработка ответа "сериал"
+        if (message.Text.ToLower().Contains("сериал"))
         {
+            type = "Series";
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
             {
                 new KeyboardButton[] { "Год выпуска", "Рейтинг на IMDb" },
@@ -131,11 +137,14 @@ public class TelegramBot
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: "Отлично! Выбери характеристику, которую хочешь настроить.",
+                replyMarkup: replyKeyboardMarkup,
                 cancellationToken: cancellationToken);
         }
 
-        if (message.Text.ToLower().Contains("Сериал ??"))
+        // Обработка ответа "фильм"
+        if (message.Text.ToLower().Contains("фильм"))
         {
+            type = "Film";
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
             {
                 new KeyboardButton[] { "Год выпуска", "Рейтинг на IMDb" },
@@ -149,6 +158,92 @@ public class TelegramBot
                 chatId: chatId,
                 text: "Прекрасно! Выбери характеристику, которую хочешь настроить.",
                 replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+
+        // Обработка ответа "год выпуска"
+        if (message.Text.ToLower().Contains("год выпуска"))
+        {
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "1921-1940", "1941-1960" },
+                new KeyboardButton[] { "1961-1980", "1981-2000" },
+                new KeyboardButton[] { "2001-2010", "2010-2015" },
+                new KeyboardButton[] { "2016-2020", "2022-2023" },
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Выбери предложенный промежуток или введите конкретный год самостоятельно.",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+
+        bool characteristic = false;
+        // Обработка дат
+        if (message.Text.Contains("19") || message.Text.Contains("20"))
+        {
+            date = message.Text.Split('-').ToList();
+            characteristic = true;
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Супер!",
+                cancellationToken: cancellationToken);
+            
+        }
+
+        // Обработка ответа после указания характеристики, если тип является фильмом
+        if (characteristic && (type == "Film"))
+        {
+            characteristic = false;
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "Подобранный фильм" },
+                new KeyboardButton[] { "Год выпуска", "Рейтинг на IMDb" },
+                new KeyboardButton[] { "Жанр", "Продолжительность" },
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Можешь выбрать дополнительную характеристику, изменить прошлую или нажать \"Подобранный фильм\" и увидеть результат подбора",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+
+        // Обработка ответа после указания характеристики, если тип является сериалом
+        if (characteristic && (type == "Series"))
+        {
+            characteristic = false;
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "Подобранный сериал" },
+                new KeyboardButton[] { "Год выпуска", "Рейтинг на IMDb" },
+                new KeyboardButton[] { "Жанр", "Кол-во эпизодов" },
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Можешь выбрать дополнительную характеристику, изменить прошлую или нажать \"Подобранный сериал\" и увидеть результат подбора",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+
+        // Обработка ответа "Подобранный фильм/сериал"
+        if (message.Text.ToLower().Contains("подобранный фильм") || message.Text.ToLower().Contains("подобранный сериал"))
+        {
+            var res_film = SelectedFilm(type, date, raiting, genre, totalDuration);
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Идеальный фильм для тебя прямо сейчас: \n" + res_film,
                 cancellationToken: cancellationToken);
         }
     }
@@ -175,5 +270,45 @@ public class TelegramBot
         
         // Завершаем работу
         return Task.CompletedTask;
+    }
+
+    string type = "";
+    List<string> date = new List<string>();
+    int raiting = -1;
+    string genre = "";
+    int totalDuration = -1;
+
+    /// <summary>
+    /// Обрабатывает полученные характеристики и возвращает подобранный фильм
+    /// </summary>
+    public static Parsing.Film SelectedFilm(string type, List<string> date, int raiting, string genre, int totalDuration)
+    {
+        var films = Parsing.ParsFile();
+
+        if (type != "")
+            films = films.Where(x => x.Type == type).ToList();
+
+        if (date.Count == 1)
+            films = films.Where(x => x.Date == int.Parse(date[0])).ToList();
+        if (date.Count == 2)
+        {
+            var date1 = int.Parse(date[0]);
+            var date2 = int.Parse(date[1]);
+            films = films.Where(x => (x.Date >= date1) && (x.Date <= date2)).ToList();
+        }
+
+        if (raiting != -1)
+            films = films.Where(x => x.Rating > raiting).ToList();
+
+        if (genre != "")
+            films = films.Where(x => x.Genre.Contains(genre)).ToList();
+
+        if (totalDuration != -1)
+            films = films.Where(x => x.TotalDuration > totalDuration).ToList();
+
+        var cnt = films.Count;
+        Random r = new Random();
+        var i = r.Next(cnt);
+        return films[i];
     }
 }
