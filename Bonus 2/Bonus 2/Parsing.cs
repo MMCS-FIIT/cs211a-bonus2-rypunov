@@ -39,7 +39,7 @@ namespace Bonus_2
             {
                 if (Type == "Film")
                     return "Название - " + Name + "\" \nГод выпуска - " + Date + "\nРейтинг - " + Rating + 
-                        "\nЖанр - " + Genre + "\nТип - " + Type + "\nПродолжительность - " + TotalDuration + "\n";
+                        "\nЖанр - " + Genre + "\nТип - " + Type + "\nПродолжительность - " + TotalDuration + " минут(а)\n";
                 else
                     return "Название - " + Name + "\" \nГод выпуска - " + Date + "\nРейтинг - " + Rating +
                         "\nЖанр - " + Genre + "\nТип - " + Type + "\nКол-во эпизодов - " + TotalDuration +  "\n";

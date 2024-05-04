@@ -4,6 +4,7 @@ namespace SimpleTGBot;
 
 using Bonus_2;
 using System;
+using System.Linq;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -93,7 +94,7 @@ public class TelegramBot
         {
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: "Привет, " + message.Chat.FirstName + "!\nЯ помогу подобрать лучший фильм специально для тебя.",
+                text: "Привет, " + message.Chat.FirstName + "!\nЯ помогу подобрать лучший фильм или сериал специально для тебя.",
                 cancellationToken: cancellationToken);
 
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
@@ -122,7 +123,7 @@ public class TelegramBot
         }
 
         // Обработка ответа "сериал"
-        if (message.Text.ToLower().Contains("сериал"))
+        if (message.Text.ToLower() == "сериал")
         {
             type = "Series";
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
@@ -142,7 +143,7 @@ public class TelegramBot
         }
 
         // Обработка ответа "фильм"
-        if (message.Text.ToLower().Contains("фильм"))
+        if (message.Text.ToLower() == "фильм")
         {
             type = "Film";
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
@@ -161,7 +162,7 @@ public class TelegramBot
                 cancellationToken: cancellationToken);
         }
 
-        // Обработка ответа "год выпуска"
+        // Обработка ответа "Год выпуска"
         if (message.Text.ToLower().Contains("год выпуска"))
         {
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
@@ -183,16 +184,51 @@ public class TelegramBot
         }
 
         bool characteristic = false;
-        // Обработка дат
+        // Обработка полученной даты
         if (message.Text.Contains("19") || message.Text.Contains("20"))
         {
             date = message.Text.Split('-').ToList();
             characteristic = true;
+
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: "Супер!",
                 cancellationToken: cancellationToken);
             
+        }
+
+        // Обработка ответа "Рейтинг на IMDb"
+        if (message.Text.ToLower().Contains("рейтинг на imdb"))
+        {
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "9+", "8+", "7+" },
+                new KeyboardButton[] { "6+", "5+", "4+" },
+                new KeyboardButton[] { "3+", "3+", "1+" },
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Выбери предложенный порог рейтинга, либо введи его самостоятельно",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+
+        // Обработка рейтинга IMDb 
+        if ((new string[9] { "9+", "8+", "7+", "6+", "5+", "4+", "3+", "2+", "1+" }).Contains(message.Text))
+        {
+            raiting = (int)message.Text.First() - '0';
+            Console.WriteLine(raiting);
+            characteristic = true;
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Отличный выбор!",
+                cancellationToken: cancellationToken);
+
         }
 
         // Обработка ответа после указания характеристики, если тип является фильмом
@@ -243,7 +279,7 @@ public class TelegramBot
             var res_film = SelectedFilm(type, date, raiting, genre, totalDuration);
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: "Идеальный фильм для тебя прямо сейчас: \n" + res_film,
+                text: "Идеальный вариант для тебя прямо сейчас: \n" + res_film,
                 cancellationToken: cancellationToken);
         }
     }
