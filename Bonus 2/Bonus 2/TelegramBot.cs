@@ -218,10 +218,45 @@ public class TelegramBot
         }
 
         // Обработка рейтинга IMDb 
-        if ((new string[9] { "9+", "8+", "7+", "6+", "5+", "4+", "3+", "2+", "1+" }).Contains(message.Text))
+        if ((new string[] { "9+", "8+", "7+", "6+", "5+", "4+", "3+", "2+", "1+" }).Contains(message.Text))
         {
             raiting = (int)message.Text.First() - '0';
-            Console.WriteLine(raiting);
+            characteristic = true;
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Отличный выбор!",
+                cancellationToken: cancellationToken);
+
+        }
+
+        // Обработка ответа "Жанр"
+        if (message.Text.ToLower().Contains("жанр"))
+        {
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "Боевик", "Приключения", "Триллер" },
+                new KeyboardButton[] { "Криминал", "Научная фантастика", "Драма" },
+                new KeyboardButton[] { "Комедия", "Спортивный", "Мультфильм" },
+                new KeyboardButton[] { "Ужасы", "Мистика", "Романтика" },
+                new KeyboardButton[] { "Исторический", "Биографический", "Семейный" },
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Какой жанр тебя интересует?",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+        
+        // Обработка жанра 
+        if ((new string[] { "Боевик", "Приключения", "Триллер", "Криминал", "Научная фантастика", "Драма", "Комедия", "Спортивный",
+            "Мультфильм", "Ужасы", "Мистика", "Романтика", "Исторический", "Биографический", "Семейный" }).Contains(message.Text))
+        {
+            genre = message.Text;
             characteristic = true;
 
             await botClient.SendTextMessageAsync(
@@ -277,10 +312,19 @@ public class TelegramBot
         if (message.Text.ToLower().Contains("подобранный фильм") || message.Text.ToLower().Contains("подобранный сериал"))
         {
             var res_film = SelectedFilm(type, date, raiting, genre, totalDuration);
-            await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "Идеальный вариант для тебя прямо сейчас: \n" + res_film,
-                cancellationToken: cancellationToken);
+
+            if (res_film.Name == "Не найдено")
+                await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Не удалось найти фильм с такими характеристиками. Попробуй изменить их.",
+                    cancellationToken: cancellationToken);
+
+            else
+                await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Идеальный вариант для тебя прямо сейчас: \n" + res_film,
+                    cancellationToken: cancellationToken);
+
         }
     }
 
@@ -336,6 +380,58 @@ public class TelegramBot
         if (raiting != -1)
             films = films.Where(x => x.Rating > raiting).ToList();
 
+        switch (genre)
+        {
+            case "Боевик":
+                genre = "Action";
+                break;
+            case "Приключения":
+                genre = "Adventures";
+                break;
+            case "Триллер":
+                genre = "Thriller";
+                break;
+            case "Криминал":
+                genre = "Crime";
+                break;
+            case "Научная фантастика":
+                genre = "Sci-Fi";
+                break;
+            case "Драма":
+                genre = "Drama";
+                break;
+            case "Комедия":
+                genre = "Comedy";
+                break;
+            case "Спортивный":
+                genre = "Sport";
+                break;
+            case "Мультфильм":
+                genre = "Animation";
+                break;
+            case "Ужасы":
+                genre = "Horror";
+                break;
+            case "Мистика":
+                genre = "Mystery";
+                break;
+            case "Романтика":
+                genre = "Romance";
+                break;
+            case "Исторический":
+                genre = "History";
+                break;
+            case "Биографический":
+                genre = "Biography";
+                break;
+            case "Семейный":
+                genre = "Family";
+                break;
+            default:
+                genre = "";
+                break;
+        }
+
         if (genre != "")
             films = films.Where(x => x.Genre.Contains(genre)).ToList();
 
@@ -345,6 +441,9 @@ public class TelegramBot
         var cnt = films.Count;
         Random r = new Random();
         var i = r.Next(cnt);
-        return films[i];
+        if (i > 0)
+            return films[i];
+        else
+            return new Parsing.Film("Не найдено", "", 0, "", "", "", "");
     }
 }

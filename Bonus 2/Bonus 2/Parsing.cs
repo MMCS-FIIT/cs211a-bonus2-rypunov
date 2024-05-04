@@ -53,16 +53,32 @@ namespace Bonus_2
         {
             var lines_arr = System.IO.File.ReadAllLines("input_files/imdb.csv");
             var movie_database = new List<Film>();
+            char[] numbers = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
             for (int i = 0; i < lines_arr.Count(); i++)
             {
                 var reg = Regex.Matches(lines_arr[i], @""".+?""").ToArray();
                 string[] el_film = lines_arr[i].Split(new char[] { ',' });
                 var genre = "";
-                if (reg.Count() < 5)
+                
+                if (reg.Count() == 3)
+                {
+                    genre = reg[1].ToString();
+                    foreach (char n in numbers)
+                    {
+                        if (reg[1].ToString().Contains(n))
+                        {
+                            genre = el_film[^10];
+                            break;
+                        }
+                    }
+                }
+                else if (reg.Count() == 0)
                     genre = el_film[4];
-                else
+
+                else if (reg.Count() == 5)
                     genre = reg[3].ToString();
+
 
                 if (el_film[2] != "No Rate")
                 {
@@ -72,8 +88,6 @@ namespace Bonus_2
                 }
             }
             return movie_database;
-            //for (int i = 0; i < 50; i++)
-            //    Console.WriteLine(movie_database[i]);
         }
     }
 }
