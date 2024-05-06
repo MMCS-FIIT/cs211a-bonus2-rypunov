@@ -261,9 +261,72 @@ public class TelegramBot
 
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: "Отличный выбор!",
+                text: "Хороший выбор!",
                 cancellationToken: cancellationToken);
 
+        }
+
+        // Обработка ответов "Кол-во эпизодов"
+        if (message.Text.ToLower().Contains("кол-во эпизодов"))
+        {
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "Меньше 10", "10-15", "16-20" },
+                new KeyboardButton[] { "21-25", "26-30", "Больше 30" },
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Выбери, какое количество эпизодов тебе подходит.",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+
+        // Обработка кол-ва эпизодов
+        if ((new string[] { "Меньше 10", "10-15", "16-20", "21-25", "26-30", "Больше 30" }).Contains(message.Text))
+        {
+            totalDuration = message.Text.Split(new char[] { '-', ' ' }).ToList();
+            characteristic = true;
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Замечательно!",
+                cancellationToken: cancellationToken);
+        }
+
+        // Обработка ответов "Продолжительность"
+        if (message.Text.ToLower().Contains("продолжительность"))
+        {
+            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
+            {
+                new KeyboardButton[] { "Менее 60 минут", "60-90 минут"},
+                new KeyboardButton[] { "90-120 минут", "120-180 минут"},
+                new KeyboardButton[] { "120-150 минут", "Более 150 минут"},
+            })
+            {
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Выбери, продолжительность фильма, подходящуюю тебе.",
+                replyMarkup: replyKeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+
+        // Обработка продолжительности
+        if ((new string[] { "Менее 60 минут", "60-90 минут", "90-120 минут", "120-180 минут", "120-150 минут", "Более 150 минут" }).Contains(message.Text))
+        {
+            totalDuration = message.Text.Split(new char[] { '-', ' ' }).ToList();
+            characteristic = true;
+
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Супер!",
+                cancellationToken: cancellationToken);
         }
 
         // Обработка ответа после указания характеристики, если тип является фильмом
@@ -356,12 +419,12 @@ public class TelegramBot
     List<string> date = new List<string>();
     int raiting = -1;
     string genre = "";
-    int totalDuration = -1;
+    List<string> totalDuration = new List<string>();
 
     /// <summary>
     /// Обрабатывает полученные характеристики и возвращает подобранный фильм
     /// </summary>
-    public static Parsing.Film SelectedFilm(string type, List<string> date, int raiting, string genre, int totalDuration)
+    public static Parsing.Film SelectedFilm(string type, List<string> date, int raiting, string genre, List<string> totalDuration)
     {
         var films = Parsing.ParsFile();
 
@@ -370,6 +433,7 @@ public class TelegramBot
 
         if (date.Count == 1)
             films = films.Where(x => x.Date == int.Parse(date[0])).ToList();
+
         if (date.Count == 2)
         {
             var date1 = int.Parse(date[0]);
@@ -435,15 +499,24 @@ public class TelegramBot
         if (genre != "")
             films = films.Where(x => x.Genre.Contains(genre)).ToList();
 
-        if (totalDuration != -1)
-            films = films.Where(x => x.TotalDuration > totalDuration).ToList();
+        if (totalDuration.Count > 0)
+        {
+            if ((totalDuration[1] == "10") || (totalDuration[1] == "60"))
+                films = films.Where(x => x.TotalDuration < int.Parse(totalDuration[1])).ToList();
+
+            else if ((totalDuration[1] == "30") || (totalDuration[1] == "150"))
+                films = films.Where(x => x.TotalDuration > int.Parse(totalDuration[1])).ToList();
+
+            else
+                films = films.Where(x => (x.TotalDuration >= int.Parse(totalDuration[0])) && (x.TotalDuration <= int.Parse(totalDuration[1]))).ToList();
+        }
 
         var cnt = films.Count;
         Random r = new Random();
-        var i = r.Next(cnt);
-        if (i > 0)
-            return films[i];
+        var i = r.Next(0, cnt);
+        if (cnt == 0)
+            return new Parsing.Film("Не найдено", "0", 0, "", "", "0", "0");
         else
-            return new Parsing.Film("Не найдено", "", 0, "", "", "", "");
+            return films[i];
     }
 }
