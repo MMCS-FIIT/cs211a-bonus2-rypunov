@@ -10,7 +10,5 @@ public static class Program
     {
         TelegramBot telegramBot = new TelegramBot();
         await telegramBot.Run();
-        //var c = Parsing.ParsFile().Where(x => ((x.TotalDuration <= 15) && (x.TotalDuration >= 10)) && (x.Type == "Series")).Count();
-        //Console.WriteLine(c);
     }
 }

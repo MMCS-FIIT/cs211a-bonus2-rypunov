@@ -105,7 +105,7 @@ public class TelegramBot
                 ResizeKeyboard = true
             };
 
-            Message sentMessage = await botClient.SendTextMessageAsync(
+            await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: "Что ты хочешь посмотреть?",
                 replyMarkup: replyKeyboardMarkup,
@@ -118,6 +118,7 @@ public class TelegramBot
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: "Заглядывайте еще!",
+                replyMarkup: new ReplyKeyboardRemove(),
                 cancellationToken: cancellationToken);
             return;
         }
@@ -185,7 +186,7 @@ public class TelegramBot
 
         bool characteristic = false;
         // Обработка полученной даты
-        if (message.Text.Contains("19") || message.Text.Contains("20"))
+        if (message.Text.Contains("-19") || message.Text.Contains("-201") || message.Text.Contains("-202"))
         {
             date = message.Text.Split('-').ToList();
             characteristic = true;
@@ -303,8 +304,8 @@ public class TelegramBot
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
             {
                 new KeyboardButton[] { "Менее 60 минут", "60-90 минут"},
-                new KeyboardButton[] { "90-120 минут", "120-180 минут"},
-                new KeyboardButton[] { "120-150 минут", "Более 150 минут"},
+                new KeyboardButton[] { "90-120 минут", "120-150 минут"},
+                new KeyboardButton[] { "150-180 минут", "Более 180 минут"},
             })
             {
                 ResizeKeyboard = true
@@ -318,7 +319,7 @@ public class TelegramBot
         }
 
         // Обработка продолжительности
-        if ((new string[] { "Менее 60 минут", "60-90 минут", "90-120 минут", "120-180 минут", "120-150 минут", "Более 150 минут" }).Contains(message.Text))
+        if ((new string[] { "Менее 60 минут", "60-90 минут", "90-120 минут", "120-150 минут", "150-180 минут", "Более 180 минут" }).Contains(message.Text))
         {
             totalDuration = message.Text.Split(new char[] { '-', ' ' }).ToList();
             characteristic = true;
@@ -504,7 +505,7 @@ public class TelegramBot
             if ((totalDuration[1] == "10") || (totalDuration[1] == "60"))
                 films = films.Where(x => x.TotalDuration < int.Parse(totalDuration[1])).ToList();
 
-            else if ((totalDuration[1] == "30") || (totalDuration[1] == "150"))
+            else if ((totalDuration[1] == "30") || (totalDuration[1] == "180"))
                 films = films.Where(x => x.TotalDuration > int.Parse(totalDuration[1])).ToList();
 
             else
