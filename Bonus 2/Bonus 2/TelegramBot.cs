@@ -383,11 +383,20 @@ public class TelegramBot
                     text: "Не удалось найти фильм с такими характеристиками. Попробуй изменить их.",
                     cancellationToken: cancellationToken);
 
+
             else
+            {
                 await botClient.SendTextMessageAsync(
                     chatId: chatId,
                     text: "Идеальный вариант для тебя прямо сейчас: \n" + res_film,
                     cancellationToken: cancellationToken);
+
+                await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "\nМожешь нажать \"Подобранный сериал\", чтобы увидеть другой вариант, подходящий тебе." +
+                          "\nТакже можешь изменить характеристики.",
+                    cancellationToken: cancellationToken);
+            }
 
         }
     }
