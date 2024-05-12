@@ -73,19 +73,55 @@ public class TelegramBot
         {
             return;
         }
+
+        // Получаем ID чата, в которое пришло сообщение. Полезно, чтобы отличать пользователей друг от друга.
+        var chatId = message.Chat.Id;
+
         // Будем обрабатывать только текстовые сообщения.
         // При желании можно обрабатывать стикеры, фото, голосовые и т. д.
         //
         // Обратите внимание на использованную конструкцию. Она эквивалентна проверке на null, приведённой выше.
         // Подробнее об этом синтаксисе: https://medium.com/@mattkenefick/snippets-in-c-more-ways-to-check-for-null-4eb735594c09
+
         if (message.Text is not { } messageText)
         {
+            // Обработка стикеров
+            if (message.Type == MessageType.Sticker)
+                await botClient.SendStickerAsync(
+                    chatId: chatId,
+                    InputFile.FromString("CAACAgIAAxkBAAEFXV5mQR6RXE31a6pF0SMXfhqxWS0jAQACRhcAApdF6UvO9wLFTXTONjUE"),
+                    cancellationToken: cancellationToken);
+
+            // Обработка фотографии
+            if (message.Type == MessageType.Photo)
+                await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Мне нравятся! Давай продолжим подбор фильма.",
+                    cancellationToken: cancellationToken);
+
+            // Обработка голосового сообщения
+            if (message.Type == MessageType.Voice)
+                await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Простите, я не умею слушать голосовые сообщения.",
+                    cancellationToken: cancellationToken);
+
+            // Обработка видео
+            if (message.Type == MessageType.Video)
+                await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "К сожалению, я не могу посмотреть это видео. Давай лучше продолжим.",
+                    cancellationToken: cancellationToken);
+
+            // Обработка аудио
+            if (message.Type == MessageType.Audio)
+                await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Я еще не научился слушать аудио. Предлагаю продолжить.",
+                    cancellationToken: cancellationToken);
             return;
         }
 
-        // Получаем ID чата, в которое пришло сообщение. Полезно, чтобы отличать пользователей друг от друга.
-        var chatId = message.Chat.Id;
-        
         // Печатаем на консоль факт получения сообщения
         Console.WriteLine($"Получено сообщение в чате {chatId}: '{messageText}'");
 
@@ -96,6 +132,11 @@ public class TelegramBot
                 chatId: chatId,
                 text: "Привет, " + message.Chat.FirstName + "!\nЯ помогу подобрать лучший фильм или сериал специально для тебя.",
                 cancellationToken: cancellationToken);
+
+            await botClient.SendStickerAsync(
+                    chatId: chatId,
+                    InputFile.FromString("CAACAgIAAxkBAAEFXWRmQR7cESlXabHAJr5P91l2nLmOYgACJhcAAoTx6UvUIdqM2XAHjTUE"),
+                    cancellationToken: cancellationToken);
 
             ReplyKeyboardMarkup replyKeyboardMarkup = new(new[]
             {
@@ -120,6 +161,11 @@ public class TelegramBot
                 text: "Заглядывайте еще!",
                 replyMarkup: new ReplyKeyboardRemove(),
                 cancellationToken: cancellationToken);
+
+            await botClient.SendStickerAsync(
+                    chatId: chatId,
+                    InputFile.FromString("CAACAgIAAxkBAAEFXWZmQR7z0T7ZTnd5hzg4GlAVzovpTQACuBcAAvpY6EscBhZhYOgEITUE"),
+                    cancellationToken: cancellationToken);
             return;
         }
 
